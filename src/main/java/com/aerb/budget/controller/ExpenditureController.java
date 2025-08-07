@@ -82,5 +82,23 @@ public class ExpenditureController {
     ) {
         return ResponseEntity.ok(serviceExp.getReport(year, month));
     }
+    
+    @GetMapping("/expenditure/total")
+    public Double getTotalExpenditure(
+        @RequestParam String year,
+        @RequestParam String type
+    ) {
+        Double total = service.sumExpenditureByYearAndType(year, type);
+        return total != null ? total : 0.0;
+    }
+
+    @GetMapping("/monthly-totals")
+    public List<Double> getMonthlyTotals(
+            @RequestParam String financialYear,
+            @RequestParam String budgetType
+    ) {
+        return service.getMonthlyTotals(financialYear, budgetType);
+    }
+
     }
 

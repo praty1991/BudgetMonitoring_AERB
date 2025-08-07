@@ -1,6 +1,7 @@
 package com.aerb.budget.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.aerb.budget.dto.BudgetItemDTO;
 import com.aerb.budget.dto.BudgetReportItemDTO;
 import com.aerb.budget.dto.BudgetSubmissionDTO;
+import com.aerb.budget.dto.DepartmentBudgetDTO;
 import com.aerb.budget.entity.BudgetEntry;
 import com.aerb.budget.entity.BudgetHead;
 import com.aerb.budget.entity.Division;
@@ -75,6 +77,22 @@ public class BudgetService {
 
     public BigDecimal getTotalEstimatedBudget(String financialYear, String budgetType) {
         return entryRepo.findTotalEstimatedBudget(financialYear, budgetType);
+    }
+    
+    public List<DepartmentBudgetDTO> getDepartmentBudgetSummary(String year, String type) {
+        List<Object[]> rows = divisionRepo.getDepartmentBudgetSummary(year, type);
+        List<DepartmentBudgetDTO> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            String name = (String) row[0];
+            double estimated = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+            double approved = row[2] != null ? ((Number) row[2]).doubleValue() : 0.0;
+            double expenditure = row[3] != null ? ((Number) row[3]).doubleValue() : 0.0;
+
+            result.add(new DepartmentBudgetDTO(name, estimated, approved, expenditure));
+        }
+
+        return result;
     }
 
 }

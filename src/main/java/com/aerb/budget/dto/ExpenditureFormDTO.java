@@ -5,7 +5,14 @@ import java.util.List;
 public class ExpenditureFormDTO {
     private String financialYear;
     private int month;  // 1 = Jan, 2 = Feb, etc.
-    private List<ExpenditureItemDTO> items;
+    private String budgetType;
+    public String getBudgetType() {
+		return budgetType;
+	}
+	public void setBudgetType(String budgetType) {
+		this.budgetType = budgetType;
+	}
+	private List<ExpenditureItemDTO> items;
 	public String getFinancialYear() {
 		return financialYear;
 	}

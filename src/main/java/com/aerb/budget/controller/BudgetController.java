@@ -18,6 +18,7 @@ import com.aerb.budget.dto.BudgetItemDTO;
 import com.aerb.budget.dto.BudgetReportEntryDTO;
 import com.aerb.budget.dto.BudgetReportItemDTO;
 import com.aerb.budget.dto.BudgetSubmissionDTO;
+import com.aerb.budget.dto.DepartmentBudgetDTO;
 import com.aerb.budget.entity.BudgetEntry;
 import com.aerb.budget.entity.BudgetReportRequest;
 import com.aerb.budget.repository.BudgetEntryRepository;
@@ -148,5 +149,13 @@ public class BudgetController {
         return ResponseEntity.ok(total != null ? total : BigDecimal.ZERO);
     }
 
+    
+    @GetMapping("/departments")
+    public List<DepartmentBudgetDTO> getDepartmentBudgets(
+            @RequestParam String year,
+            @RequestParam String type
+    ) {
+        return budgetService.getDepartmentBudgetSummary(year, type);
+    }
 
 }

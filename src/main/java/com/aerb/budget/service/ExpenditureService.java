@@ -29,7 +29,7 @@ public class ExpenditureService {
             dto.setProgressiveRupees(((Number) row.get("progressiveRupees")).doubleValue());
             dto.setExpenditureLakhs(((Number) row.get("expenditureLakhs")).doubleValue());
             dto.setProgressiveLakhs(((Number) row.get("progressiveLakhs")).doubleValue());
-            dto.setPercentageOfBE(((Number) row.get("percentageOfBE")).doubleValue());
+            dto.setPercentageOfBE(row.get("percentageOfBE") != null ? ((Number) row.get("percentageOfBE")).doubleValue() : 0.0);
             dto.setBalance(((Number) row.get("balance")).doubleValue());
             reports.add(dto);
         }

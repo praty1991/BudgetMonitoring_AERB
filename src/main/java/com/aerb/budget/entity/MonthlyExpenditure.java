@@ -3,6 +3,7 @@ package com.aerb.budget.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,9 +18,13 @@ public class MonthlyExpenditure {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "financial_year")
     private String financialYear;
+    
+    @Column(name = "budget_type")
+    private String budgetType;
 
-    private int month;
+    private Integer month;
 
     private String code;
 
@@ -43,6 +48,14 @@ public class MonthlyExpenditure {
 
 	public void setFinancialYear(String financialYear) {
 		this.financialYear = financialYear;
+	}
+	
+    public String getBudgetType() {
+		return budgetType;
+	}
+
+	public void setBudgetType(String budgetType) {
+		this.budgetType = budgetType;
 	}
 
 	public int getMonth() {

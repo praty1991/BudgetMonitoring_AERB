@@ -1,6 +1,7 @@
 package com.aerb.budget.controller;
 
 import com.aerb.budget.dto.ProcessDTO;
+import com.aerb.budget.dto.ProcessPathDTO;
 import com.aerb.budget.service.ProcessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,23 +61,35 @@ public class ProcessController {
     
     /**
      * GET /api/processes/all-path
-     * 
-     * Fetches all hierarchical paths of active processes in the format:
-     * "Director -> Manager -> Team Lead -> Employee"
      *
-     * Each path represents a full branch from a top-level process to a leaf node.
-     * 
+     * Fetches all hierarchical paths of active processes from top-level (root)
+     * to leaf nodes, returning each path as a DTO object.
+     *
+     * Each path represents a full branch in the hierarchy and includes:
+     *  - The string representation of the full path (e.g., "Director -> Manager -> Employee")
+     *  - The corresponding list of process IDs in order
+     *
      * Sample Response:
      * [
-     *   "Director A -> Manager X -> Team Lead M -> Employee 1",
-     *   "Director A -> Manager X -> Team Lead M -> Employee 2",
-     *   "Director B -> Manager Y"
+     *   {
+     *     "pathString": "Director A -> Manager X -> Team Lead M -> Employee 1",
+     *     "idPathList": [1, 3, 6, 10]
+     *   },
+     *   {
+     *     "pathString": "Director A -> Manager X -> Team Lead M -> Employee 2",
+     *     "idPathList": [1, 3, 6, 11]
+     *   },
+     *   {
+     *     "pathString": "Director B -> Manager Y",
+     *     "idPathList": [2, 5]
+     *   }
      * ]
      */
     @GetMapping("/all-path")
-    public List<String> getAllPathStrings() {
+    public List<ProcessPathDTO> getAllPathStrings() {
         return processService.getAllPathStrings();
     }
+
 
 
     /**

@@ -1,6 +1,7 @@
 package com.aerb.budget.service;
 
 import com.aerb.budget.dto.ProcessDTO;
+import com.aerb.budget.dto.ProcessPathDTO;
 import com.aerb.budget.entity.Process;
 import com.aerb.budget.exception.ResourceNotFoundException;
 import com.aerb.budget.repository.ProcessRepository;
@@ -117,65 +118,74 @@ public class ProcessService {
     }
    
     /**
-     * Retrieves all hierarchical path strings of active processes starting from top-level (root) processes.
+     * Retrieves all hierarchical path representations of active processes starting from top-level (root) processes.
      * <p>
-     * Each path is constructed in the format: "Director -> Manager -> Team Lead -> Employee", showing the
-     * entire chain from the root to each leaf node.
+     * Each result contains:
+     * - A formatted string path like: "Director -> Manager -> Team Lead -> Employee"
+     * - A list of corresponding process IDs representing the path sequence
      *
-     * @return a list of formatted path strings for all active process hierarchies
-     * @throws BadRequestException if no active root processes are found
+     * @return a list of {@link ProcessPathDTO} representing all active root-to-leaf process paths
+     * @throws ResourceNotFoundException if no active root-level processes are found
      */
-    public List<String> getAllPathStrings() {
-    	logger.info("Fetching all active root-level processes to build path strings.");
+    public List<ProcessPathDTO> getAllPathStrings() {
+        logger.info("Fetching all active root-level processes to build path DTOs.");
 
         List<Process> roots = processRepository.findByParentIsNullAndIsActiveTrue();
         if (roots.isEmpty()) {
-        	logger.warn("No active top-level processes found.");
+            logger.warn("No active top-level processes found.");
             throw new ResourceNotFoundException("No active top-level processes available.");
         }
 
-        List<String> allPaths = new ArrayList<>();
+        List<ProcessPathDTO> allPaths = new ArrayList<>();
         for (Process root : roots) {
-            buildPathStrings(root, "", allPaths);
+            buildPathDTOs(root, "", new ArrayList<>(), allPaths);
         }
 
-        logger.info("Successfully built {} hierarchical path strings.", allPaths.size());
+        logger.info("Successfully built {} hierarchical path DTOs.", allPaths.size());
         return allPaths;
     }
 
+
     /**
-     * Recursively builds hierarchical path strings for a given process and its active children.
+     * Recursively builds hierarchical path DTOs for a given process and its active children.
      * <p>
      * This method is internally used by {@link #getAllPathStrings()} to traverse the process tree.
-     * If the current process has no active children, its path is added to the list.
+     * If the current process has no active children (i.e., it's a leaf node), its complete path is added
+     * to the result list as a {@link ProcessPathDTO}.
      *
-     * @param current    the current process node being processed
-     * @param pathSoFar  the accumulated path string built so far
-     * @param allPaths   the list collecting all completed path strings
+     * @param current    the current {@link Process} node being traversed
+     * @param pathSoFar  the accumulated name path (e.g., "Director -> Manager") built so far
+     * @param idPath     the accumulated list of process IDs forming the hierarchy path
+     * @param allPaths   the list collecting all completed {@link ProcessPathDTO} objects
      */
-    private void buildPathStrings(Process current, String pathSoFar, List<String> allPaths) {
+
+    private void buildPathDTOs(Process current, String pathSoFar, List<Long> idPath, List<ProcessPathDTO> result) {
         if (!current.getIsActive()) {
-        	logger.debug("Skipping inactive process: {}", current.getName());
+            logger.debug("Skipping inactive process: {}", current.getName());
             return;
         }
 
         String currentPath = pathSoFar.isEmpty()
-            ? current.getName()
-            : pathSoFar + " -> " + current.getName();
+                ? current.getName()
+                : pathSoFar + " -> " + current.getName();
+
+        List<Long> newIdPath = new ArrayList<>(idPath);
+        newIdPath.add(current.getId());
 
         List<Process> activeChildren = current.getChildren().stream()
-            .filter(Process::getIsActive)
-            .collect(Collectors.toList());
+                .filter(Process::getIsActive)
+                .collect(Collectors.toList());
 
         if (activeChildren.isEmpty()) {
-        	logger.debug("Leaf path found: {}", currentPath);
-            allPaths.add(currentPath);
+            logger.debug("Leaf path found: {}", currentPath);
+            result.add(new ProcessPathDTO(currentPath, newIdPath));
         } else {
             for (Process child : activeChildren) {
-                buildPathStrings(child, currentPath, allPaths);
+                buildPathDTOs(child, currentPath, newIdPath, result);
             }
         }
     }
+
 
     /**
      * Creates a new process with optional parent ID, and assigns hierarchy level.
